@@ -1,6 +1,6 @@
 :root {
   --w: 40px; --h: 56px; --g: 3px;
-  --amber: #f4b400;
+  --amber: #f5f5f0;
   --tile-top: linear-gradient(#2b2b2d, #19191b);
   --tile-bot: linear-gradient(#151517, #202022);
 }
