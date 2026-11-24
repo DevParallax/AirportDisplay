@@ -1,7 +1,7 @@
 import { loadSettings, saveSettings } from './settings.js';
 import { FlapAudio } from './audio.js';
 import { Board } from './flap.js';
-import { geolocate } from './weather.js';
+import { geolocate, resolveLocation } from './weather.js';
 import { cacheSet } from './settings.js';
 import * as cal from './calendar.js';
 
@@ -21,7 +21,18 @@ $('clientid').addEventListener('change', async () => { await saveSettings({ webC
 let timer;
 $('city').addEventListener('input', () => {
   clearTimeout(timer);
-  timer = setTimeout(() => saveSettings({ city: $('city').value.trim() }), 500);
+  timer = setTimeout(async () => {
+    const city = $('city').value.trim();
+    await saveSettings({ city });
+    const st = $('geo-status');
+    if (!city) { st.textContent = ''; return; }
+    st.textContent = 'Looking up…';
+    try { st.textContent = 'Found: ' + ((await resolveLocation(city)).label || city); }
+    catch (e) {
+      st.textContent = { CITY_NOT_FOUND: 'No city with that name was found.', OFFLINE: 'Could not reach the weather service (offline or blocked).' }[e.code]
+        || 'Lookup failed: ' + (e.message || e.code);
+    }
+  }, 600);
 });
 $('units').addEventListener('change', () => saveSettings({ units: $('units').value }));
 $('hour12').addEventListener('change', () => saveSettings({ hour12: $('hour12').value === 'true' }));

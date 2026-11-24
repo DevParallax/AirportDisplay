@@ -37,11 +37,13 @@ export async function resolveLocation(city) {
     if (cached) return cached;
     const url = 'https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&format=json&name=' +
       encodeURIComponent(city);
-    const res = await fetch(url);
-    if (!res.ok) throw new WeatherError('GEOCODE');
+    let res;
+    try { res = await fetch(url); } catch { throw new WeatherError('OFFLINE'); }
+    if (!res.ok) throw new WeatherError('GEOCODE', 'Geocoder HTTP ' + res.status);
     const hit = (await res.json()).results?.[0];
     if (!hit) throw new WeatherError('CITY_NOT_FOUND');
-    const loc = { lat: hit.latitude, lon: hit.longitude, name: hit.name };
+    const loc = { lat: hit.latitude, lon: hit.longitude, name: hit.name,
+      label: [hit.name, hit.admin1, hit.country].filter(Boolean).join(', ') };
     await cacheSet(key, loc);
     return loc;
   }
@@ -69,7 +71,8 @@ export async function fetchWeather(loc, units = 'metric') {
     temperature_unit: imperial ? 'fahrenheit' : 'celsius',
     wind_speed_unit: imperial ? 'mph' : 'kmh',
   });
-  const res = await fetch('https://api.open-meteo.com/v1/forecast?' + params);
+  let res;
+  try { res = await fetch('https://api.open-meteo.com/v1/forecast?' + params); } catch { throw new WeatherError('OFFLINE'); }
   if (!res.ok) throw new WeatherError('HTTP', 'Open-Meteo ' + res.status);
   const j = await res.json();
   const r = (n) => (n == null ? null : Math.round(n));
