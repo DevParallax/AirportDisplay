@@ -1,6 +1,6 @@
 // Settings + small cache, backed by chrome.storage (falls back to localStorage
 // so the page can also be previewed from a plain web server).
-const DEFAULTS = { city: '', units: 'metric', hour12: false, sound: true, volume: 0.6 };
+const DEFAULTS = { city: '', units: 'metric', hour12: false, sound: true, volume: 0.6, webClientId: '' };
 const hasChrome = typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync;
 const LS_KEY = 'airport-settings';
 

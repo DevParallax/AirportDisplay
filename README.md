@@ -36,6 +36,19 @@ The extension ID is fixed by the `key` in `manifest.json`:
 The extension requests only the read-only calendar scope. All calendars you have ticked in
 Google Calendar are included; events you declined are hidden.
 
+## Microsoft Edge
+
+Install the same way: `edge://extensions` > Developer mode > **Load unpacked** (the extension ID is the same).
+Edge can't use Chrome's Google sign-in, so Calendar uses a web-style OAuth flow:
+
+1. In the same Google Cloud project, create another OAuth client ID of type **Web application**.
+2. Add the **Authorised redirect URI** shown on the extension's Settings page
+   (`https://ojclhgbpdcjdilbjgjmmmlndfoakcebg.chromiumapp.org/`).
+3. Paste the client ID into Settings > **OAuth client ID**, then click **Connect**.
+
+Tokens last about an hour and are renewed silently while Edge has an active Google session; if that
+lapses, click the board to sign in again. The extension picks the right method automatically.
+
 ## Files
 
 | File | Purpose |
@@ -51,4 +64,4 @@ Google Calendar are included; events you declined are hidden.
 
 - Text is upper-cased and limited to the board's character set; titles longer than 21 characters are cut off.
 - Weather refreshes every 15 min, calendar every 5 min, statuses every 30 s.
-- `getAuthToken` is Chrome-only; other Chromium browsers will show the board without calendar data.
+- Chrome uses `getAuthToken`; Edge and other Chromium browsers use `launchWebAuthFlow` (see above).

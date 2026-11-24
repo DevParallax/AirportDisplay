@@ -12,6 +12,10 @@ $('hour12').value = String(s.hour12);
 $('sound').checked = s.sound;
 $('volume').value = s.volume;
 
+$('clientid').value = s.webClientId || '';
+$('redirect').textContent = chrome.identity?.getRedirectURL?.() || '';
+$('clientid').addEventListener('change', async () => { await saveSettings({ webClientId: $('clientid').value.trim() }); calStatus(); });
+
 let timer;
 $('city').addEventListener('input', () => {
   clearTimeout(timer);
@@ -38,8 +42,8 @@ $('test').addEventListener('click', async () => {
 async function calStatus() {
   const el = $('cal-status');
   const connected = $('connect'), disconnected = $('disconnect');
-  if (!cal.isConfigured()) {
-    el.textContent = 'Not configured: add your OAuth client ID to manifest.json (see README).';
+  if (!(await cal.isConfigured())) {
+    el.textContent = 'Not configured: add an OAuth client ID (see README).';
     connected.disabled = disconnected.disabled = true;
     return;
   }

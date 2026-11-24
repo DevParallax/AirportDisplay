@@ -7,17 +7,58 @@ export class CalendarError extends Error {
   constructor(code, msg) { super(msg || code); this.code = code; }
 }
 
-export function isConfigured() {
-  try {
-    const id = chrome.runtime.getManifest().oauth2?.client_id || '';
-    return id && !id.startsWith('YOUR_CLIENT_ID');
-  } catch { return false; }
+import { loadSettings, cacheGet, cacheSet } from './settings.js';
+
+// Chrome can use getAuthToken (OAuth client of type "Chrome extension").
+// Edge and other Chromium browsers can't, so they use launchWebAuthFlow with a
+// "Web application" client ID entered in Settings. Tokens last ~1 hour and are
+// renewed silently while the browser is signed in to Google.
+const SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
+const useNative = () =>
+  typeof chrome !== 'undefined' && !!chrome.identity?.getAuthToken && !/\bEdg(e|A|iOS)?\//.test(navigator.userAgent);
+
+function manifestClientId() {
+  const id = chrome.runtime.getManifest().oauth2?.client_id || '';
+  return id.startsWith('YOUR_CLIENT_ID') ? '' : id;
+}
+
+export async function isConfigured() {
+  if (typeof chrome === 'undefined' || !chrome.identity) return false;
+  if (useNative()) return !!manifestClientId();
+  return !!(await loadSettings()).webClientId;
+}
+
+export const redirectUri = () => chrome.identity.getRedirectURL();
+
+async function webFlowToken(interactive) {
+  const cached = await cacheGet('gtoken');
+  if (cached && cached.expires > Date.now() + 60e3) return cached.token;
+  const { webClientId } = await loadSettings();
+  const url = 'https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
+    client_id: webClientId,
+    response_type: 'token',
+    redirect_uri: redirectUri(),
+    scope: SCOPE,
+    include_granted_scopes: 'true',
+  });
+  const result = await chrome.identity.launchWebAuthFlow({ url, interactive });
+  const frag = new URLSearchParams(new URL(result).hash.slice(1));
+  const token = frag.get('access_token');
+  if (!token) throw new Error(frag.get('error') || 'no token');
+  await cacheSet('gtoken', { token, expires: Date.now() + Number(frag.get('expires_in') || 3600) * 1000 });
+  return token;
+}
+
+async function dropToken(token) {
+  if (useNative()) await chrome.identity.removeCachedAuthToken({ token });
+  else await cacheSet('gtoken', null);
 }
 
 export async function getToken(interactive) {
-  if (typeof chrome === 'undefined' || !chrome.identity?.getAuthToken) throw new CalendarError('UNSUPPORTED');
-  if (!isConfigured()) throw new CalendarError('NOT_CONFIGURED');
+  if (typeof chrome === 'undefined' || !chrome.identity) throw new CalendarError('UNSUPPORTED');
+  if (!(await isConfigured())) throw new CalendarError('NOT_CONFIGURED');
   try {
+    if (!useNative()) return await webFlowToken(interactive);
     const r = await chrome.identity.getAuthToken({ interactive });
     const token = typeof r === 'string' ? r : r?.token;
     if (!token) throw new Error('no token');
@@ -32,7 +73,7 @@ async function api(path, params, token, retry = true) {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (res.status === 401 && retry) {
-    await chrome.identity.removeCachedAuthToken({ token });
+    await dropToken(token);
     return api(path, params, await getToken(false), false);
   }
   if (res.status === 401 || res.status === 403) throw new CalendarError('NEEDS_AUTH', 'HTTP ' + res.status);
@@ -81,6 +122,6 @@ export async function disconnect() {
   try {
     const token = await getToken(false);
     await fetch('https://accounts.google.com/o/oauth2/revoke?token=' + token).catch(() => {});
-    await chrome.identity.removeCachedAuthToken({ token });
+    await dropToken(token);
   } catch { /* already disconnected */ }
 }
