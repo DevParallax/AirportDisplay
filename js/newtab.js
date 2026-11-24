@@ -152,7 +152,7 @@ async function refreshWeather() {
     const loc = await resolveLocation(state.settings.city);
     state.weather = await fetchWeather(loc, state.settings.units);
   } catch (e) {
-    const msg = { NO_LOCATION: 'SET A CITY IN SETTINGS', CITY_NOT_FOUND: 'CITY NOT FOUND' }[e.code];
+    const msg = { NO_LOCATION: 'ALLOW LOCATION OR SET CITY', CITY_NOT_FOUND: 'CITY NOT FOUND' }[e.code];
     // keep stale data on transient failures
     if (!state.weather || msg) state.weather = { error: msg || 'WEATHER UNAVAILABLE' };
   }

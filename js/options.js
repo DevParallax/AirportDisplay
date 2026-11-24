@@ -1,6 +1,8 @@
 import { loadSettings, saveSettings } from './settings.js';
 import { FlapAudio } from './audio.js';
 import { Board } from './flap.js';
+import { geolocate } from './weather.js';
+import { cacheSet } from './settings.js';
 import * as cal from './calendar.js';
 
 const $ = (id) => document.getElementById(id);
@@ -53,3 +55,17 @@ async function calStatus() {
 $('connect').addEventListener('click', async () => { try { await cal.getToken(true); } catch { /* cancelled */ } calStatus(); });
 $('disconnect').addEventListener('click', async () => { await cal.disconnect(); calStatus(); });
 calStatus();
+
+$('geo').addEventListener('click', async () => {
+  const st = $('geo-status');
+  st.textContent = 'Asking the browser…';
+  try {
+    const pos = await geolocate();
+    await cacheSet('geo:last', { ...pos, name: 'LOCAL' });
+    $('city').value = '';
+    await saveSettings({ city: '' });
+    st.textContent = `Using browser location (${pos.lat.toFixed(2)}, ${pos.lon.toFixed(2)}).`;
+  } catch {
+    st.textContent = 'Location blocked or unavailable. Allow location for this browser/site in system settings, or enter a city.';
+  }
+});

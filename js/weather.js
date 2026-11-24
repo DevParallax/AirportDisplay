@@ -18,7 +18,7 @@ export class WeatherError extends Error {
   constructor(code, msg) { super(msg || code); this.code = code; }
 }
 
-function geolocate() {
+export function geolocate() {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) return reject(new WeatherError('NO_LOCATION'));
     navigator.geolocation.getCurrentPosition(
@@ -74,7 +74,7 @@ export async function fetchWeather(loc, units = 'metric') {
   const j = await res.json();
   const r = (n) => (n == null ? null : Math.round(n));
   return {
-    place: loc.name,
+    place: loc.name === 'LOCAL' && j.timezone ? j.timezone.split('/').pop().replace(/_/g, ' ') : loc.name,
     desc: WMO[j.current.weather_code] ?? 'UNKNOWN',
     temp: r(j.current.temperature_2m),
     hi: r(j.daily?.temperature_2m_max?.[0]),
