@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Airport Display",
+  "version": "1.0.0",
+  "description": "A split-flap airport departures board for your new tab: date, time, weather and today's Google Calendar meetings, with mechanical flap sounds.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0MTyz/zRyuiboyO+0laps/wp4YTGsE6F14UWAb6526CQHVytht+S10JARVhQbWqkE9sTSf07KUKbJlO4LzE6NX7+PvYjnKTjBwcNeE3ow0dudCRS6lWEeAUuq4Th+tZHtCKH7Z2Rke5VAvK8MZlNcFq7knO9LAm8kgXodV1fBX4ADDbcJY4K5BRsYh9QtpNW+1BWIQh9jS5t4fzOxG5X9Yaw/juppQkrHoa9GbFT++1/dzrJoCKRjGsYyRhXndE6XGHvrobp1h3a+n9ycZFUTWCrCSofsIzcNGK6ajAuoaFTK2Zfq3Oz3OBxCXqQ+QfJGeVwIdl1/bsYJ9lwsAoEjQIDAQAB",
+  "icons": { "16": "icons/icon16.png", "48": "icons/icon48.png", "128": "icons/icon128.png" },
+  "chrome_url_overrides": { "newtab": "newtab.html" },
+  "options_ui": { "page": "options.html", "open_in_tab": true },
+  "permissions": ["storage", "identity", "geolocation"],
+  "host_permissions": [
+    "https://www.googleapis.com/*",
+    "https://accounts.google.com/*",
+    "https://api.open-meteo.com/*",
+    "https://geocoding-api.open-meteo.com/*"
+  ],
+  "oauth2": {
+    "client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com",
+    "scopes": ["https://www.googleapis.com/auth/calendar.readonly"]
+  }
+}

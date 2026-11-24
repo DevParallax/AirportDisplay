@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Airport Display settings</title>
+  <link rel="stylesheet" href="css/options.css">
+</head>
+<body>
+  <main>
+    <h1>Airport Display</h1>
+    <p class="sub">Settings save automatically.</p>
+
+    <label>Weather location
+      <input id="city" type="text" placeholder="Leave blank to use this browser's location">
+      <small id="city-note">e.g. “London” or “Austin”</small>
+    </label>
+
+    <label>Units
+      <select id="units">
+        <option value="metric">Celsius, km/h</option>
+        <option value="imperial">Fahrenheit, mph</option>
+      </select>
+    </label>
+
+    <label>Clock
+      <select id="hour12">
+        <option value="false">24-hour</option>
+        <option value="true">12-hour (AM/PM)</option>
+      </select>
+    </label>
+
+    <label class="row"><input id="sound" type="checkbox"> Flap sounds</label>
+    <label>Volume <input id="volume" type="range" min="0" max="1" step="0.05"></label>
+    <button id="test" type="button">Play test clatter</button>
+
+    <h2>Google Calendar</h2>
+    <p id="cal-status">Checking…</p>
+    <div class="row">
+      <button id="connect" type="button">Connect</button>
+      <button id="disconnect" type="button">Disconnect</button>
+    </div>
+  </main>
+  <script type="module" src="js/options.js"></script>
+</body>
+</html>

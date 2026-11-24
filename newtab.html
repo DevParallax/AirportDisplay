@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Departures</title>
+  <link rel="stylesheet" href="css/board.css">
+</head>
+<body>
+  <main id="stage">
+    <section id="board-head"></section>
+    <div class="labels" aria-hidden="true">
+      <span class="l-time">TIME</span>
+      <span class="l-title">MEETING</span>
+      <span class="l-status">STATUS</span>
+    </div>
+    <section id="board-meet"></section>
+  </main>
+
+  <div id="sound-hint" hidden>Click anywhere to enable sound</div>
+
+  <nav id="controls">
+    <button id="btn-sound" title="Toggle sound" aria-label="Toggle sound">🔊</button>
+    <button id="btn-full" title="Full screen" aria-label="Full screen">⛶</button>
+    <button id="btn-settings" title="Settings" aria-label="Settings">⚙</button>
+  </nav>
+
+  <script type="module" src="js/newtab.js"></script>
+</body>
+</html>
